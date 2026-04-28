@@ -26,6 +26,7 @@ jobs:
 
       BUILD_DEPS: "wheel~=0.37.0 pip~=25.3.0"
       ENVSPEC: ./specs/win/requirements.txt
+      INSTALLER_ENVSPEC: ./specs/win/requirements-installer.txt
 
     strategy:
       fail-fast: False
@@ -61,11 +62,15 @@ jobs:
       - name: Prepare wheels
         shell: bash
         run: |
+          grep -viE '^[[:space:]]*pip([[:space:]]|[<>=!~].*)?$' \
+               "$ENVSPEC" > "$INSTALLER_ENVSPEC"
+          cat "$INSTALLER_ENVSPEC"
+
           python -m pip install $BUILD_DEPS
           if [[ $BUILD_LOCAL ]]; then
-             PIP_ARGS=( -r $ENVSPEC ./orange3 );
+             PIP_ARGS=( -r "$INSTALLER_ENVSPEC" ./orange3 );
           else
-             PIP_ARGS=( -r $ENVSPEC Orange3==$BUILD_COMMIT );
+             PIP_ARGS=( -r "$INSTALLER_ENVSPEC" Orange3==$BUILD_COMMIT );
           fi
           python -m pip wheel -w ./wheels -f ./wheels "${PIP_ARGS[@]}" orange3
           ls ./wheels
@@ -82,7 +87,7 @@ jobs:
                --no-index --find-links=./wheels \
                --python-version $PYTHON_VERSION \
                --platform $PLATTAG \
-               --pip-arg=--pre --pip-arg=-r --pip-arg=$ENVSPEC --pip-arg=Orange3
+               --pip-arg=--pre --pip-arg=-r --pip-arg="$INSTALLER_ENVSPEC" --pip-arg=Orange3
 
           INSTALLER=( dist/Orange3*.exe )
           SHA256=$( sha256sum -b $INSTALLER )
