@@ -14,7 +14,7 @@ jobs:
     runs-on:  windows-2022
     timeout-minutes: 60
     env:
-      REPO: https://github.com/biolab/orange3.git
+      REPO: https://github.com/yc004/orange3.git
       BUILD_BRANCH: master
       BUILD_COMMIT: "3.39.0"
       BUILD_LOCAL: ""
